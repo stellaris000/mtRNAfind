@@ -48,7 +48,7 @@ python3 code/annotation_free_adaptive_depth.py \
   --adaptive-depth-mode fixed \
   --density-min-raw-pair-support 25 \
   --display-min-cluster-support 1000 \
-  --display-score-threshold 0.55
+  --display-score-threshold 0.4
 ```
 
 `--display-score-threshold` 默认值为 `0.40`，用于设定候选展示评分的最低阈值。提高该值会使筛选更保守，通常减少输出候选；降低该值会放宽筛选，通常增加输出候选。实际有效阈值还受样本内相对评分下限约束，因此调低后不保证每个样本都会增加候选。
