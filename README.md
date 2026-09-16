@@ -48,7 +48,7 @@ python3 code/annotation_free_adaptive_depth.py \
   --adaptive-depth-mode fixed \
   --density-min-raw-pair-support 25 \
   --display-min-cluster-support 1000 \
-  --display-score-threshold 0.55
+  --display-score-threshold 0.4
 ```
 
 `--display-score-threshold` defaults to `0.40` and sets the minimum candidate display score. Raising it makes output more conservative and usually reduces the number of candidates; lowering it relaxes the filter and usually increases the number of candidates. The effective threshold also has a sample-relative lower bound, so lowering this value does not guarantee additional candidates for every sample.
