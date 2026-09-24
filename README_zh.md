@@ -48,14 +48,36 @@ python3 code/annotation_free_adaptive_depth.py \
   --adaptive-depth-mode fixed \
   --density-min-raw-pair-support 25 \
   --display-min-cluster-support 1000 \
-  --display-score-threshold 0.4
+  --display-score-threshold 0.55
 ```
 
 `--display-score-threshold` 默认值为 `0.40`，用于设定候选展示评分的最低阈值。提高该值会使筛选更保守，通常减少输出候选；降低该值会放宽筛选，通常增加输出候选。实际有效阈值还受样本内相对评分下限约束，因此调低后不保证每个样本都会增加候选。
 
+## 可选：从 BAM 制作 SSC
+
+已有 SSC 时可跳过此步骤。`code/bam2ssc.py` 是独立的上游转换脚本；除上述 mtfind 依赖外，还需要在同一 Python 环境安装 `pysam`，并确保 `samtools` 位于 `PATH`。输入应为按坐标排序且已建索引的 BAM，以及带 `.fai` 索引的对应参考 FASTA；BAM 中的 contig 名称须与 FASTA 序列名一致。安装和建索引方法参见 [pysam](https://pysam.readthedocs.io/en/latest/) 与 [samtools](https://www.htslib.org/doc/) 官方文档。
+
+在仓库根目录运行，替换为自己的路径，并使用新的输出目录：
+
+```bash
+python3 code/bam2ssc.py \
+  --reference /path/to/MT.fa \
+  --bam /path/to/sample.mt.sorted.bam \
+  --output results/ssc_sample \
+  --threads 4
+
+python3 code/annotation_free_adaptive_depth.py \
+  --ssc results/ssc_sample/sample.mt.sorted_flnc.ssc \
+  --outdir results/mtfind_sample \
+  --sample-id sample
+```
+
+每个 BAM 会生成 `*_flnc.ssc`（逐 read 的端点记录）和 `*_ssc.count`（汇总计数）；默认排除 secondary 和 supplementary 比对。mtfind 只读取 `*_flnc.ssc`，不需要 BAM、参考 FASTA、索引或计数文件。转换脚本会**覆盖已有目录中的同名输出**，因此 `--output` 应指向新目录。mtfind 默认的 `MT` 与 16,569 bp 适用于人类线粒体；其他参考序列需相应设置 `--chrom` 和 `--sequence-length`。
+
 ## 内容
 
 - `code/annotation_free_adaptive_depth.py`：mtfind 0.311 候选发现主程序。
+- `code/bam2ssc.py`：可选的 BAM 转 SSC 脚本。
 - `code/gtf_coordinate_benchmark.py`：可选的运行后坐标比较模块，按实际执行版本原样保留。
 - `tests/test_seed_backfill.py`：seed/backfill 聚类的小型回归测试。
 - `examples/sgnex_a549/`：一个真实数据 SSC 示例及其准确运行命令。
